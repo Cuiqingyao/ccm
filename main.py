@@ -9,7 +9,9 @@ import time
 import random
 random.seed(time.time())
 from model import Model, _START_VOCAB
+import os
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 tf.app.flags.DEFINE_boolean("is_train", True, "Set to False to inference.")
 tf.app.flags.DEFINE_integer("symbols", 30000, "vocabulary size.")
 tf.app.flags.DEFINE_integer("num_entities", 21471, "entitiy vocabulary size.")
