@@ -37,10 +37,13 @@ def prepare_data(path, is_train=True):
     
     with open('%s/resource.txt' % path) as f:
         d = json.loads(f.readline())
-    
-    csk_triples = d['csk_triples']
-    csk_entities = d['csk_entities']
-    raw_vocab = d['vocab_dict']
+
+    csk_triples = d['csk_triples'] # [u'h1, r1, t1', u'h2, r2, t3', ...]
+    csk_entities = d['csk_entities'] # [u'e1', u'e2', ...]
+    raw_vocab = d['vocab_dict'] # {u'word1':freq1, u'word2':freq2, ...}
+
+    # {u'e1':[u'e1, r, t', u'h, r, e1', ...], u'e2':[u'e2, r, t', u'h, r, e2', ...], ...}
+    # entity word and triples list that includes this word
     kb_dict = d['dict_csk']
     
     data_train, data_dev, data_test = [], [], []
@@ -65,8 +68,10 @@ def prepare_data(path, is_train=True):
 def build_vocab(path, raw_vocab, trans='transE'):
     print("Creating word vocabulary...")
     vocab_list = _START_VOCAB + sorted(raw_vocab, key=raw_vocab.get, reverse=True)
+    # ['_PAD', '_UNK', '_GO', '_EOS', u'word1', u'word2',  ...] sorted by word frequency
     if len(vocab_list) > FLAGS.symbols:
         vocab_list = vocab_list[:FLAGS.symbols]
+    # [0 : 30000]
 
     print("Creating entity vocabulary...")
     entity_list = ['_NONE', '_PAD_H', '_PAD_R', '_PAD_T', '_NAF_H', '_NAF_R', '_NAF_T']
@@ -74,6 +79,7 @@ def build_vocab(path, raw_vocab, trans='transE'):
         for i, line in enumerate(f):
             e = line.strip()
             entity_list.append(e)
+    # ['_NONE', '_PAD_H', '_PAD_R', '_PAD_T', '_NAF_H', '_NAF_R', '_NAF_T', e1, e2, e3, ... ]
 
     print("Creating relation vocabulary...")
     relation_list = []
@@ -81,7 +87,7 @@ def build_vocab(path, raw_vocab, trans='transE'):
         for i, line in enumerate(f):
             r = line.strip()
             relation_list.append(r)
-
+    # [r1, r2, r3, ... ]
     print("Loading word vectors...")
     vectors = {}
     with open('%s/glove.840B.300d.txt' % path) as f:
@@ -96,7 +102,7 @@ def build_vocab(path, raw_vocab, trans='transE'):
     embed = []
     for word in vocab_list:
         if word in vectors:
-            vector = map(float, vectors[word].split())
+            vector = list(map(float, vectors[word].split()))
         else:
             vector = np.zeros((FLAGS.embed_units), dtype=np.float32)
         embed.append(vector)
