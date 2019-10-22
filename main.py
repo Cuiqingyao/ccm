@@ -111,7 +111,7 @@ def build_vocab(path, raw_vocab, trans='transE'):
     with open('%s/entity_%s.txt' % (path, trans)) as f:
         for i, line in enumerate(f):
             s = line.strip().split('\t')
-            entity_embed.append(map(float, s))
+            entity_embed.append(list(map(float, s)))
 
     print("Loading relation vectors...")
     relation_embed = []
