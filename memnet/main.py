@@ -10,7 +10,9 @@ import random
 import sqlite3
 random.seed(time.time())
 from model import Model, _START_VOCAB
+import os
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '2'
 tf.app.flags.DEFINE_boolean("is_train", True, "Set to False to inference.")
 tf.app.flags.DEFINE_integer("symbols", 30000, "vocabulary size.")
 tf.app.flags.DEFINE_integer("num_entities", 21471, "entitiy vocabulary size.")
@@ -96,7 +98,7 @@ def build_vocab(path, raw_vocab, trans='transE'):
     embed = []
     for word in vocab_list:
         if word in vectors:
-            vector = map(float, vectors[word].split())
+            vector = list(map(float, vectors[word].split()))
         else:
             vector = np.zeros((FLAGS.embed_units), dtype=np.float32)
         embed.append(vector)
@@ -107,7 +109,7 @@ def build_vocab(path, raw_vocab, trans='transE'):
     with open('%s/entity_%s.txt' % (path, trans)) as f:
         for i, line in enumerate(f):
             s = line.strip().split('\t')
-            entity_embed.append(map(float, s))
+            entity_embed.append(list(map(float, s)))
 
     print("Loading relation vectors...")
     relation_embed = []
@@ -309,16 +311,16 @@ with tf.Session(config=config) as sess:
             print("Created model with fresh parameters.")
             tf.global_variables_initializer().run()
             op_in = model.symbol2index.insert(constant_op.constant(vocab),
-                constant_op.constant(range(FLAGS.symbols), dtype=tf.int64))
+                constant_op.constant(list(range(FLAGS.symbols)), dtype=tf.int64))
             sess.run(op_in)
             op_out = model.index2symbol.insert(constant_op.constant(
-                range(FLAGS.symbols), dtype=tf.int64), constant_op.constant(vocab))
+                list(range(FLAGS.symbols)), dtype=tf.int64), constant_op.constant(vocab))
             sess.run(op_out)
             op_in = model.entity2index.insert(constant_op.constant(entity_vocab+relation_vocab),
-                constant_op.constant(range(len(entity_vocab)+len(relation_vocab)), dtype=tf.int64))
+                constant_op.constant(list(range(len(entity_vocab)+len(relation_vocab))), dtype=tf.int64))
             sess.run(op_in)
             op_out = model.index2entity.insert(constant_op.constant(
-                range(len(entity_vocab)+len(relation_vocab)), dtype=tf.int64), constant_op.constant(entity_vocab+relation_vocab))
+                list(range(len(entity_vocab)+len(relation_vocab))), dtype=tf.int64), constant_op.constant(entity_vocab+relation_vocab))
             sess.run(op_out)
 
         if FLAGS.log_parameters:
