@@ -262,6 +262,8 @@ def test(sess, saver, data_dev, setnum=5000):
             match_entity_sum = [.0] * 4
             cnt = 0
             for post, response, result, match_triples, triples, entities in zip([data['post'] for data in data_dev], [data['response'] for data in data_dev], results, [data['match_triples'] for data in data_dev], [data['all_triples'] for data in data_dev], [data['all_entities'] for data in data_dev]):
+                post = [str(p, encoding='utf-8') for p in post]
+                response = [str(r, encoding='utf-8') for r in response]
                 setidx = cnt / setnum
                 result_matched_entities = []
                 triples = [csk_triples[tri] for triple in triples for tri in triple]
