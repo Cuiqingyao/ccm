@@ -279,8 +279,6 @@ def test(sess, saver, data_dev, setnum=5000):
             match_entity_sum = [.0] * 4
             cnt = 0
             for post, response, result, match_triples, triples, entities in zip([data['post'] for data in data_dev], [data['response'] for data in data_dev], results, [data['match_triples'] for data in data_dev], [data['all_triples'] for data in data_dev], [data['all_entities'] for data in data_dev]):
-                post = [str(p, encoding='utf-8')for p in post]
-                response = [str(r, encoding='utf-8') for r in response]
                 setidx = cnt / setnum
                 result_matched_entities = []
                 triples = [csk_triples[tri] for triple in triples for tri in triple]
@@ -291,7 +289,11 @@ def test(sess, saver, data_dev, setnum=5000):
                 for word in result:
                     if word not in stopwords and word in entities:
                         result_matched_entities.append(word)
-                outfile.write('post: %s\nresponse: %s\nresult: %s\nmatch_entity: %s\n\n' % (' '.join(post), ' '.join(response), ' '.join(result), ' '.join(result_matched_entities)))
+                post_str = ' '.join(post)
+                response_str = ' '.join(response)
+                result_str = ' '.join(result)
+                result_matched_entities_str = ' '.join(result_matched_entities)
+                outfile.write('post: %s\nresponse: %s\nresult: %s\nmatch_entity: %s\n\n' % (post_str, response_str, result_str, result_matched_entities_str))
                 match_entity_sum[setidx] += len(set(result_matched_entities))
                 cnt += 1
             match_entity_sum = [m / setnum for m in match_entity_sum] + [sum(match_entity_sum) / len(data_dev)]
